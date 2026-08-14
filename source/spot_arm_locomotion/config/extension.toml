@@ -1,0 +1,19 @@
+[package]
+version = "3.0.0"
+category = "isaaclab"
+readme = "README.md"
+title = "Spot with Arm Locomotion"
+author = "Isaac Projects"
+maintainer = "Isaac Projects"
+description = "Isaac Lab manager-based RL locomotion environment for Boston Dynamics Spot with Arm."
+repository = "https://github.com/isaac-sim/IsaacLab.git"
+keywords = ["isaaclab", "spot", "locomotion", "reinforcement-learning"]
+
+[dependencies]
+"isaaclab" = {}
+"isaaclab_assets" = {}
+"isaaclab_rl" = {}
+"isaaclab_tasks" = {}
+
+[[python.module]]
+name = "spot_arm_locomotion"

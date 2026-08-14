@@ -1,0 +1,14 @@
+logs/
+outputs/
+*.egg-info/
+__pycache__/
+*.pyc
+.python-version
+usd/
+usd_lab/
+*.usd
+*.usda
+.asset_hash
+*.pt
+*.onnx
+.vscode/
