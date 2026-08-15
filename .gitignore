@@ -12,3 +12,4 @@ usd_lab/
 *.pt
 *.onnx
 .vscode/
+.cursor/
