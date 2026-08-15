@@ -46,7 +46,7 @@ ARM_JOINT_NAMES = ["arm_.*"]
 # forearm lies on top of it pointing forward; gripper closed at the front.
 #   sh1 → lower limit  -π   (horizontal back, parallel to the body top)
 #   el0 → upper limit  +π   (180 deg fold, second link stacked on the first)
-#   f1x → lower limit -1.57 (closed; 0 = open)
+#   f1x → 0 closed (finger along the jaw); -1.57 = open
 ARM_STOW_JOINT_POS = {
     "arm_sh0": 0.0,
     "arm_sh1": -3.12,  # ~-179 deg, first link flat along the back (limit -π)
@@ -54,7 +54,7 @@ ARM_STOW_JOINT_POS = {
     "arm_el1": 0.0,
     "arm_wr0": 0.0,
     "arm_wr1": 0.0,
-    "arm_f1x": -1.56,  # closed (limit -1.57)
+    "arm_f1x": 0.0,  # closed (0 = shut; -1.57 = open)
 }
 
 

@@ -22,13 +22,13 @@ Spot Arm (6 DoF + gripper), mount on body at xyz=(0.292, 0, 0.188)
     el1 twist  [-2.79,  2.79]
     wr0 pitch  [-1.83,  1.83]
     wr1 twist  [-2.88,  2.88]
-    f1x gripper[-1.57,  0.00]   0 = open, -1.57 = closed
+    f1x gripper[-1.57,  0.00]   0 = closed, -1.57 = open
 
   BD named stow (firmware, not published as numbers):
     Shoulder + elbow fully folded, arm centered on the back, elbow toward the
     rear, gripper overhanging the front. Ready-to-walk pose.
   Numeric stow used here (stay inside limits; avoid ±π which USD can wrap to 0):
-      sh0=0.00  sh1=-3.12  el0=3.12  el1=0  wr0=0  wr1=0  f1x=-1.56 (closed)
+      sh0=0.00  sh1=-3.12  el0=3.12  el1=0  wr0=0  wr1=0  f1x=0.00 (closed)
 
 This script overwrites root + joint state every physics step (so soft leg PD
 does not sag the feet into the plane) and snaps the lowest foot sphere onto z=0.
