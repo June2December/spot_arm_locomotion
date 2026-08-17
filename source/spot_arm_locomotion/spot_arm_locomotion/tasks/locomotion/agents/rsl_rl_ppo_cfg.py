@@ -9,7 +9,7 @@ class SpotArmRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     """On-policy PPO settings aligned with ``SpotWithArmRoughCfgPPO``."""
 
     num_steps_per_env = 24
-    max_iterations = 1500
+    max_iterations = 3000
     save_interval = 50
     experiment_name = "rough_spot_with_arm"
     store_code_state = False
@@ -18,7 +18,7 @@ class SpotArmRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         activation="elu",
         obs_normalization=False,
         # log-space std cannot go negative (scalar std crashed training at iter ~351).
-        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0, std_type="log"),
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=0.4, std_type="log"),
     )
     critic = RslRlMLPModelCfg(
         hidden_dims=[512, 256, 128],

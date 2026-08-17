@@ -60,6 +60,9 @@ Checkpoints land in `logs/rsl_rl/rough_spot_with_arm/<timestamp>/`.
 
 Pass `--checkpoint path/to/model_XXXX.pt` to load a specific run.
 
+학습 중간점검(실패 분석, 그래프, PLAY 캡처)은 [`docs/training/`](docs/training/)에 있다.
+1차는 기립에 실패했다: [`docs/training/round-02/`](docs/training/round-02/).
+
 ## Control / observation summary
 
 | Channel | Dim | Source |

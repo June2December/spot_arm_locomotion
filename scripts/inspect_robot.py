@@ -46,6 +46,12 @@ import argparse
 from isaaclab.app import AppLauncher
 
 parser = argparse.ArgumentParser(description="Inspect Spot-with-Arm on a flat plane (1 robot).")
+parser.add_argument(
+    "--pd-hold",
+    action="store_true",
+    help="Do not overwrite joints every step. Hold the default pose with PD only (stand test).",
+)
+parser.add_argument("--duration", type=float, default=0.0, help="Exit after this many seconds (0 = until window close).")
 AppLauncher.add_app_launcher_args(parser)
 args_cli = parser.parse_args()
 
@@ -116,6 +122,9 @@ def print_state(robot) -> None:
     for name, value in zip(names, q.tolist()):
         marker = "  <- stow" if name in ARM_STOW_JOINT_POS else ""
         print(f"    {name:24s} {value: .4f}{marker}")
+    if hasattr(robot.data, "joint_stiffness"):
+        kp = robot.data.joint_stiffness.torch[0]
+        print("[INFO] Joint stiffness:", {n: float(k) for n, k in zip(names, kp.tolist())})
     bodies = list(robot.body_names)
     pos = robot.data.body_pos_w.torch[0]
     for i, name in enumerate(bodies):
@@ -124,17 +133,64 @@ def print_state(robot) -> None:
             print(f"[INFO] body {name:28s}  z={z: .3f}  xy=({x: .3f}, {y: .3f})")
 
 
-def run_simulator(sim: SimulationContext, scene: InteractiveScene, root_pose: torch.Tensor) -> None:
+def apply_pd_targets(robot, scene: InteractiveScene) -> None:
+    q = robot.data.default_joint_pos.torch.clone()
+    dq = robot.data.default_joint_vel.torch.clone()
+    robot.set_joint_position_target_index(target=q)
+    robot.set_joint_velocity_target_index(target=dq)
+    scene.write_data_to_sim()
+
+
+def projected_gravity_xy(robot) -> tuple[float, float, float]:
+    """Return (gx, gy, |g_xy|) of projected gravity in the body frame, env 0."""
+    g = robot.data.projected_gravity_b.torch[0]
+    gx, gy, gz = (float(g[0]), float(g[1]), float(g[2]))
+    return gx, gy, (gx * gx + gy * gy) ** 0.5
+
+
+def run_simulator(sim: SimulationContext, scene: InteractiveScene, root_pose: torch.Tensor) -> int:
     robot = scene["robot"]
     sim_dt = sim.get_physics_dt()
     printed = False
+    elapsed = 0.0
+    next_log = 1.0
+    max_tilt = 0.0
+    min_z = float("inf")
     while simulation_app.is_running():
-        hold_pose(robot, root_pose)
+        if args_cli.pd_hold:
+            apply_pd_targets(robot, scene)
+        else:
+            hold_pose(robot, root_pose)
         if not printed:
             print_state(robot)
             printed = True
         sim.step()
         scene.update(sim_dt)
+        elapsed += sim_dt
+        if args_cli.pd_hold:
+            _, _, gxy = projected_gravity_xy(robot)
+            max_tilt = max(max_tilt, gxy)
+            z = float(robot.data.root_pos_w.torch[0, 2])
+            min_z = min(min_z, z)
+            if elapsed >= next_log:
+                print(
+                    f"[PD-HOLD] t={elapsed:.1f}s  body_z={z:.3f} m  "
+                    f"|g_xy|={gxy:.3f} (0=upright, 1=sideways)"
+                )
+                next_log += 1.0
+        if args_cli.duration > 0 and elapsed >= args_cli.duration:
+            break
+
+    if args_cli.pd_hold and args_cli.duration > 0:
+        print(f"[PD-HOLD] done. min body_z={min_z:.3f} m  max |g_xy|={max_tilt:.3f}")
+        # Fail if it tipped past ~35 deg (|g_xy|~0.57) or body dropped below 0.35 m
+        # (standing spawn is ~0.52 m; 0.35 m is still on the feet, not the belly).
+        if max_tilt > 0.57 or min_z < 0.35:
+            print("[PD-HOLD] FAIL: pose not held by PD.")
+            return 1
+        print("[PD-HOLD] PASS: default pose held by PD.")
+        return 0
+    return 0
 
 
 def main() -> None:
@@ -156,10 +212,13 @@ def main() -> None:
     hold_pose(robot, root_pose)
 
     print("[INFO] Inspect: standing Spot-with-Arm, arm stow sh1=-3.12 el0=3.12 gripper closed, feet on plane.")
+    if args_cli.pd_hold:
+        print("[INFO] PD-hold: joints are NOT overwritten each step.")
     print("[INFO] Close the Isaac Sim window to exit.")
-    run_simulator(sim, scene, root_pose)
+    rc = run_simulator(sim, scene, root_pose)
+    simulation_app.close()
+    raise SystemExit(rc)
 
 
 if __name__ == "__main__":
     main()
-    simulation_app.close()

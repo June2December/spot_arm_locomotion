@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 
 import isaaclab.sim as sim_utils
-from isaaclab.actuators import ImplicitActuatorCfg
+from isaaclab.actuators import DelayedPDActuatorCfg, ImplicitActuatorCfg
 from isaaclab.assets.articulation import ArticulationCfg
 
 def _find_project_root() -> str:
@@ -154,18 +154,19 @@ SPOT_WITH_ARM_CFG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.54),
         joint_pos={
-            # legs — standing pose from legged_gym SpotWithArmRoughCfg
-            "front_left_hip_x": 0.0,
-            "front_left_hip_y": 0.8,
+            # legs — Isaac Lab Spot stance (hip_x splayed out, hind hip_y a bit more)
+            # https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab_assets/isaaclab_assets/robots/spot.py
+            "front_left_hip_x": 0.1,
+            "front_left_hip_y": 0.9,
             "front_left_knee": -1.5,
-            "front_right_hip_x": 0.0,
-            "front_right_hip_y": 0.8,
+            "front_right_hip_x": -0.1,
+            "front_right_hip_y": 0.9,
             "front_right_knee": -1.5,
-            "rear_left_hip_x": 0.0,
-            "rear_left_hip_y": 0.8,
+            "rear_left_hip_x": 0.1,
+            "rear_left_hip_y": 1.1,
             "rear_left_knee": -1.5,
-            "rear_right_hip_x": 0.0,
-            "rear_right_hip_y": 0.8,
+            "rear_right_hip_x": -0.1,
+            "rear_right_hip_y": 1.1,
             "rear_right_knee": -1.5,
             # arm — BD stow (folded onto the back). URDF zeros point the arm forward.
             **ARM_STOW_JOINT_POS,
@@ -174,15 +175,19 @@ SPOT_WITH_ARM_CFG = ArticulationCfg(
     ),
     soft_joint_pos_limit_factor=0.9,
     actuators={
-        "legs": ImplicitActuatorCfg(
+        "legs": DelayedPDActuatorCfg(
             joint_names_expr=LEG_JOINT_NAMES,
-            effort_limit_sim={
+            effort_limit={
                 ".*_hip_x": 45.0,
                 ".*_hip_y": 45.0,
                 ".*_knee": 115.0,
             },
-            stiffness=20.0,
-            damping=0.5,
+            # 150/4 held a stand but locked swing: 5–7차는 미끄러짐만.
+            # Lab Spot USD is 60/1.5. 80/3 still holds, lets a step happen.
+            stiffness=80.0,
+            damping=3.0,
+            min_delay=0,
+            max_delay=0,
         ),
         "arm": ImplicitActuatorCfg(
             joint_names_expr=ARM_JOINT_NAMES,

@@ -39,7 +39,7 @@ class SpotArmActionsCfg:
     joint_pos = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=LEG_JOINT_NAMES,
-        scale=0.25,
+        scale=0.4,
         use_default_offset=True,
     )
 
@@ -131,10 +131,17 @@ class SpotArmRewardsCfg:
     """Reward terms mapped from ``legged_gym`` SpotWithArm / LeggedRobotCfg."""
 
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": 1.0}
+    )
+    # Standing is 0; any speed along the command is positive. Gives a gradient
+    # at v=0 that the exponential kernel does not.
+    track_lin_vel_xy_dot = RewTerm(
+        func=spot_arm_mdp.track_lin_vel_xy_dot,
+        weight=1.0,
+        params={"command_name": "base_velocity"},
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": 1.0}
     )
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
@@ -150,12 +157,32 @@ class SpotArmRewardsCfg:
     )
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
     feet_air_time = RewTerm(
-        func=mdp.feet_air_time,
+        func=spot_arm_mdp.feet_air_time,
         weight=1.0,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=FEET_BODY_NAMES),
             "command_name": "base_velocity",
-            "threshold": 0.5,
+            "threshold": 0.1,
+        },
+    )
+    # Round 5: body moves, feet_air_time stays 0. Only new term vs that run:
+    # pay for foot height while a walk command is on. No slide, no friction change.
+    foot_clearance = RewTerm(
+        func=spot_arm_mdp.foot_clearance,
+        weight=2.0,
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=FEET_BODY_NAMES),
+            "command_name": "base_velocity",
+            "target_height": 0.08,
+        },
+    )
+    feet_slide = RewTerm(
+        func=spot_arm_mdp.feet_slide,
+        weight=0.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=FEET_BODY_NAMES),
+            "asset_cfg": SceneEntityCfg("robot", body_names=FEET_BODY_NAMES),
+            "body_speed_threshold": 0.4,
         },
     )
     undesired_contacts = RewTerm(
@@ -173,7 +200,10 @@ class SpotArmRewardsCfg:
         weight=-1.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=ARM_JOINT_NAMES)},
     )
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=0.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
+    # Round 1/2a: mean return rose because episodes got shorter. Dying must be worse
+    # than staying up with small per-step penalties (H1/G1/Cassie use -200).
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
 
 
 @configclass
@@ -241,7 +271,7 @@ class SpotArmEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         # Randomize only the 12 leg joints on reset; arm is handled by reset_arm_joints.
         self.events.reset_robot_joints.params["asset_cfg"] = SceneEntityCfg("robot", joint_names=LEG_JOINT_NAMES)
-        self.events.reset_robot_joints.params["position_range"] = (0.8, 1.2)
+        self.events.reset_robot_joints.params["position_range"] = (0.9, 1.1)
 
         # Do not spawn with roll/pitch/z velocity — that dumps the robot on its side.
         self.events.reset_base.params["velocity_range"] = {
