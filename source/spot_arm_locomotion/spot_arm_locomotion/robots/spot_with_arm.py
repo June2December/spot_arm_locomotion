@@ -182,6 +182,16 @@ SPOT_WITH_ARM_CFG = ArticulationCfg(
                 ".*_hip_y": 45.0,
                 ".*_knee": 115.0,
             },
+            # PhysX solver limit. Round-13 first resume set velocity_limit_sim
+            # to the URDF 12/17.6 rad/s; the round-12 policy still swung at
+            # 50 rad/s and PhysX braked the knee into the ground (episode 1 s,
+            # bad_orientation 0.52). Clip_actions is the speed limiter this
+            # round. URDF speed caps stay documented, not in the solver.
+            effort_limit_sim={
+                ".*_hip_x": 45.0,
+                ".*_hip_y": 45.0,
+                ".*_knee": 115.0,
+            },
             # 150/4 held a stand but locked swing: 5–7차는 미끄러짐만.
             # Lab Spot USD is 60/1.5. 80/3 still holds, lets a step happen.
             stiffness=80.0,

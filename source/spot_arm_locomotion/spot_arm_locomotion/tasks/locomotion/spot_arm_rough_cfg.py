@@ -1,6 +1,6 @@
 """Velocity-tracking env for Spot with Arm.
 
-Round 10: round-9 walk + rough terrain curriculum from level 0.
+Round 15: Lab-style default-pose pull on hip_y + knee. Clip 2.5, gait kept.
 """
 
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG
@@ -11,13 +11,17 @@ from .spot_arm_env_cfg import SpotArmEnvCfg
 
 @configclass
 class SpotArmRoughEnvCfg(SpotArmEnvCfg):
-    """Velocity tracking. Round 10: rough generator, curriculum from 0."""
+    """Velocity tracking. Rough generator, hip_y+knee default pull, clipped trot."""
 
     def __post_init__(self):
         super().__post_init__()
 
         self.rewards.dof_torques_l2.weight = -0.0001
-        self.rewards.dof_pos_limits.weight = -1.0
+        # Round 12: back to -10.0, now that the term is scoped to the legs and
+        # every rad of it is something the policy can actually act on.
+        self.rewards.dof_pos_limits.weight = -10.0
+        self.rewards.leg_joint_deviation.weight = -0.2
+        self.rewards.hip_x_deviation.weight = -1.0
         self.rewards.track_lin_vel_xy_dot.weight = 1.5
         self.rewards.action_rate_l2.weight = -0.005
         self.rewards.feet_air_time.weight = 1.5
@@ -25,8 +29,9 @@ class SpotArmRoughEnvCfg(SpotArmEnvCfg):
         self.rewards.undesired_contacts.weight = -1.0
         self.rewards.arm_joint_deviation.weight = -1.0
         self.rewards.flat_orientation_l2.weight = -1.0
+        self.rewards.gait.weight = 5.0
 
-        # Round 9 walks on a plane. Round 1 died on stairs before it could
+        # Round 9 walked on a plane. Round 1 died on stairs before it could
         # stand — start the Lab 10×20 grid at level 0 and let curriculum climb.
         self.scene.terrain.terrain_type = "generator"
         self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG.replace(

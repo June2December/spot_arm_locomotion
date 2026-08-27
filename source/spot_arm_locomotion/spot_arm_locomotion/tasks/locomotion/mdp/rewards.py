@@ -8,6 +8,7 @@ import torch
 
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils.math import quat_apply
+from isaaclab_tasks.manager_based.locomotion.velocity.config.spot.mdp.rewards import GaitReward
 from isaaclab_tasks.manager_based.locomotion.velocity.mdp.rewards import feet_air_time as _feet_air_time
 from isaaclab_tasks.manager_based.locomotion.velocity.mdp.rewards import feet_slide as _feet_slide
 
@@ -76,23 +77,48 @@ def feet_slide(
     return slide * (speed > body_speed_threshold).float()
 
 
+def _ground_height_under_feet(
+    env: ManagerBasedRLEnv, foot_pos: torch.Tensor, sensor_cfg: SceneEntityCfg
+) -> torch.Tensor:
+    """Terrain height below each foot, from the nearest height-scanner ray hit.
+
+    The scanner grid is 0.1 m, so near a stair edge the nearest hit can belong
+    to the neighbouring step. That error is one step height; using world z=0
+    instead is off by the whole sub-terrain origin (up to ±1 m on pyramids).
+    """
+    hits = env.scene.sensors[sensor_cfg.name].data.ray_hits_w.torch
+    finite = torch.isfinite(hits).all(dim=-1)
+    hits = torch.nan_to_num(hits, nan=0.0, posinf=0.0, neginf=0.0)
+    dist = torch.cdist(foot_pos[:, :, :2], hits[:, :, :2])
+    dist = dist.masked_fill(~finite.unsqueeze(1), float("inf"))
+    return torch.gather(hits[:, :, 2], 1, torch.argmin(dist, dim=2))
+
+
 def foot_clearance(
     env: ManagerBasedRLEnv,
     asset_cfg: SceneEntityCfg,
+    sensor_cfg: SceneEntityCfg,
     command_name: str = "base_velocity",
     target_height: float = 0.08,
 ) -> torch.Tensor:
-    """Reward commanded robots for raising a foot off the ground.
+    """Reward commanded robots for raising a foot off the ground it stands on.
 
     The swing-velocity gate used in 6a zeroed this term while standing, so
     there was no gradient to pick a foot up. Command-gated height is 0 when
     the command is ~0 or the feet stay on the ground, and rises as soon as
     a foot leaves the sphere radius.
+
+    Round 10 measured that height against world z, which only holds on a
+    plane: a pyramid platform sits up to 1 m above zero (term pinned at 1,
+    lifting a foot earns nothing) and an inverted pyramid 1 m below (term
+    pinned at 0, lifting a foot cannot earn anything). Height is now taken
+    above the terrain directly under each foot, so a plane behaves exactly as
+    in round 9 and stairs keep the same gradient.
     """
     foot_pos, _foot_vel = _foot_pos_vel(env, asset_cfg)
-    ground = _FOOT_RADIUS
+    ground = _ground_height_under_feet(env, foot_pos, sensor_cfg) + _FOOT_RADIUS
     lift = torch.clamp(
-        (foot_pos[:, :, 2] - ground) / max(target_height - ground, 1e-3), min=0.0, max=1.0
+        (foot_pos[:, :, 2] - ground) / max(target_height - _FOOT_RADIUS, 1e-3), min=0.0, max=1.0
     )
     cmd = torch.linalg.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
     return torch.mean(lift, dim=1) * (cmd > 0.1).float()

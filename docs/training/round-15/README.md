@@ -1,0 +1,10 @@
+# 15차 — 무릎을 기본 자세로
+
+앞 무릎 mean −1.90 → **−1.75**, 몸통 높이 0.43 → **0.47 m**. 걸음·std 유지.
+체크포인트: `2026-08-27_10-20-22/model_10146.pt`.
+
+| 파일 | 내용 |
+|---|---|
+| [01-기본자세무릎.md](01-기본자세무릎.md) | 본문 + 결과 |
+| [watch_gates.py](watch_gates.py) | 학습 중 게이트 |
+| [export_tensorboard_figures.py](export_tensorboard_figures.py) | 14차와 겹쳐 그림 |

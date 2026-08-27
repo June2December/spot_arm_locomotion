@@ -167,11 +167,13 @@ class SpotArmRewardsCfg:
     )
     # Round 5: body moves, feet_air_time stays 0. Only new term vs that run:
     # pay for foot height while a walk command is on. No slide, no friction change.
+    # Round 11: height is measured above the terrain under the foot, not world z.
     foot_clearance = RewTerm(
         func=spot_arm_mdp.foot_clearance,
         weight=2.0,
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=FEET_BODY_NAMES),
+            "sensor_cfg": SceneEntityCfg("height_scanner"),
             "command_name": "base_velocity",
             "target_height": 0.08,
         },
@@ -193,12 +195,55 @@ class SpotArmRewardsCfg:
             "threshold": 1.0,
         },
     )
-    dof_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-10.0)
+    # Legs only. Of the 0.398 rad violation logged in rounds 10/11, 0.376 is the
+    # PD-held arm stow pose sitting outside its own soft limits (sh1 0.162,
+    # el0 0.135, f1x 0.079). The policy cannot move the arm, so an unscoped
+    # weight is a constant offset with no gradient.
+    dof_pos_limits = RewTerm(
+        func=mdp.joint_pos_limits,
+        weight=-10.0,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=LEG_JOINT_NAMES)},
+    )
     # Keep the unused arm near the folded default pose.
     arm_joint_deviation = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-1.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=ARM_JOINT_NAMES)},
+    )
+    # Round 14 dropped the knee from this term (clip=1.0 had locked it).
+    # Round 15 restores knee + hip_y at -0.2 — same shape as Lab Spot's
+    # joint_position_penalty toward default (-1.5), not a "force extend"
+    # term. Clip is 2.5 so the knee can still swing. hip_x stays separate.
+    leg_joint_deviation = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-0.2,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_y", ".*_knee"])},
+    )
+    # hip_x is the stance-width joint and carries no part of a forward stride,
+    # so it gets a stronger pull than the rest of the leg.
+    hip_x_deviation = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-1.0,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_x"])},
+    )
+    # Round 13: diagonal trot. Round 12 walked with 19% single-foot support and
+    # a 0.08 s front-left swing vs 0.25 s rear-left. Isaac Lab's Spot uses this
+    # term at weight 10; 5.0 is the same shape at half the scale so tracking
+    # (logged ~3) is not drowned on resume.
+    gait = RewTerm(
+        func=spot_arm_mdp.GaitReward,
+        weight=5.0,
+        params={
+            "std": 0.1,
+            "max_err": 0.2,
+            "velocity_threshold": 0.5,
+            "synced_feet_pair_names": (
+                ("front_left_lower_leg", "rear_right_lower_leg"),
+                ("front_right_lower_leg", "rear_left_lower_leg"),
+            ),
+            "asset_cfg": SceneEntityCfg("robot"),
+            "sensor_cfg": SceneEntityCfg("contact_forces"),
+        },
     )
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
     # Round 1/2a: mean return rose because episodes got shorter. Dying must be worse
