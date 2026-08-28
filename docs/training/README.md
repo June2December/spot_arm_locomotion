@@ -1,19 +1,19 @@
-# 학습 기록
+# Training log
 
-차수마다 폴더가 다름. 체크포인트·TensorBoard 원본은 gitignore된 `logs/`에 있음.
+One folder per training round. Checkpoints and raw TensorBoard runs stay in gitignored `logs/`.
 
-| 폴더 | 무엇 |
+| Folder | Summary |
 |---|---|
-| [round-02](round-02/) | 1차. 0.28초에 전복 |
-| [round-03](round-03/) | 2차. 서서 안 걸음 |
-| [round-04](round-04/) | 4차. 중심은 잡고 제자리 |
-| [round-05](round-05/) | 5차. 몸통은 가고 발은 안 뗌 |
-| [round-07](round-07/) | 7차. 발 들림 보상만 |
-| [round-08](round-08/) | 8차. 넘어짐 벌점/slide → 빨리 죽음 |
-| [round-09](round-09/) | 9차. PD 80. 평지에서 걸음 |
-| [round-10](round-10/) | 10차. 9차 이어서 험지 커리큘럼. 레벨 6에서 정체 |
-| [round-11](round-11/) | 11차. 발 높이를 세계 z 대신 지형 위에서 재기 |
-| [round-12](round-12/) | 12차. 다리를 기본 자세로 당기기. 스탠스 폭 19% → 119% |
-| [round-13](round-13/) | 13차. 클립+트로트. PLAY 걸음은 좋아짐. std 203 폭주 |
-| [round-14](round-14/) | 14차. 클립 2.5. std 폭주 없음. 무릎은 움직이지만 ㄱ 웅크림 |
-| [round-15](round-15/) | 15차. 무릎 default pull. 앞 무릎 −1.90→−1.75, 높이 0.43→0.47 · [PLAY](round-15/videos/round-15-play.webm) |
+| [round-02](round-02/) | Round 1. Fell over in ~0.28 s |
+| [round-03](round-03/) | Round 2. Stood but did not walk |
+| [round-04](round-04/) | Round 4. Balanced in place |
+| [round-05](round-05/) | Round 5. Body moved, feet did not lift |
+| [round-07](round-07/) | Round 7. Foot-clearance reward only |
+| [round-08](round-08/) | Round 8. Fall/slide penalties → short episodes |
+| [round-09](round-09/) | Round 9. PD 80. Walking on flat terrain |
+| [round-10](round-10/) | Round 10. Rough curriculum from round 9. Stuck at terrain level 6 |
+| [round-11](round-11/) | Round 11. Foot height measured above terrain, not world z |
+| [round-12](round-12/) | Round 12. Default-pose leg pull. Stance width 19% → 119% |
+| [round-13](round-13/) | Round 13. Clip + trot. Better PLAY gait; `mean_std` blew up to 203 |
+| [round-14](round-14/) | Round 14. `clip_actions=2.5`. No std blow-up; knees stayed crouched |
+| [round-15](round-15/) | Round 15. Knee default pull. Front knee −1.90→−1.75, height 0.43→0.47 m · [PLAY](round-15/videos/round-15-play.mp4) |
