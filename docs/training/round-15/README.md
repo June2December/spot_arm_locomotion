@@ -6,5 +6,6 @@
 | 파일 | 내용 |
 |---|---|
 | [01-기본자세무릎.md](01-기본자세무릎.md) | 본문 + 결과 |
+| [videos/round-15-play.webm](videos/round-15-play.webm) | PLAY 캡처 (rough test, vx=1.0 m/s) |
 | [watch_gates.py](watch_gates.py) | 학습 중 게이트 |
 | [export_tensorboard_figures.py](export_tensorboard_figures.py) | 14차와 겹쳐 그림 |

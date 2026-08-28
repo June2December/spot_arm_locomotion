@@ -63,6 +63,14 @@ Pass `--checkpoint path/to/model_XXXX.pt` to load a specific run.
 학습 중간점검(실패 분석, 그래프, PLAY 캡처)은 [`docs/training/`](docs/training/)에 있다.
 1차는 기립에 실패했다: [`docs/training/round-02/`](docs/training/round-02/).
 
+### Latest playback — round 15
+
+Checkpoint `model_10146.pt` (`2026-08-27_10-20-22`). Rough-test PLAY, vx=1.0 m/s.
+
+<video controls src="docs/training/round-15/videos/round-15-play.webm" width="720"></video>
+
+[다운로드 / 직접 열기](docs/training/round-15/videos/round-15-play.webm) · [15차 분석](docs/training/round-15/)
+
 ## Control / observation summary
 
 | Channel | Dim | Source |
