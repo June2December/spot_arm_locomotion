@@ -12,4 +12,5 @@
 | [check_joint_limit_penalty.py](check_joint_limit_penalty.py) | `dof_pos_limits` 의 다리/팔 분해 |
 | [export_tensorboard_figures.py](export_tensorboard_figures.py) | 11차와 겹쳐 그림·수치 추출 |
 
-자세 측정은 [`../round-11/diagnose_gait.py`](../round-11/diagnose_gait.py) 를 그대로 씀.
+자세·보폭 측정은 [`../../scripts/evaluate_rollout.py`](../../scripts/evaluate_rollout.py) (통합).  
+예전: [`../round-11/diagnose_gait.py`](../round-11/diagnose_gait.py), [`diagnose_gait_timing.py`](diagnose_gait_timing.py).
