@@ -2,7 +2,8 @@
 
 One folder per training round. Checkpoints and raw TensorBoard runs stay in gitignored `logs/`.
 
-**Rollout metrics (beyond GUI):** [EVALUATION.md](EVALUATION.md) · `scripts/evaluate_rollout.py`
+**During training:** [TRAINING.md](TRAINING.md) · `watch_gates.py` · `export_training_figures.py`  
+**After checkpoint:** [EVALUATION.md](EVALUATION.md) · `scripts/evaluate_rollout.py`
 
 | Folder | Summary |
 |---|---|
