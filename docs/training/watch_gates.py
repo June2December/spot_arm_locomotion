@@ -17,7 +17,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 LOGS = Path("/home/june/isaac_projects/spot_arm_locomotion/logs/rsl_rl/rough_spot_with_arm")
 DT_POLICY = 0.02
 
-# Standard gates — see TRAINING.md
+# Standard gates used across recent rounds.
 GATES = [
     ("Curriculum/terrain_levels", "terrain", 1.0),
     ("Train/mean_episode_length", "episode_s", DT_POLICY),
@@ -48,8 +48,7 @@ def main() -> None:
         return
 
     steps = np.array([e.step for e in ea.Scalars("Train/mean_reward")])
-    print(f"{run.name}  iter {steps[0]} -> {steps[-1]}  ({len(steps)} logged)")
-    print("See docs/training/TRAINING.md for what each column means.\n")
+    print(f"{run.name}  iter {steps[0]} -> {steps[-1]}  ({len(steps)} logged)\n")
     picks = np.unique(np.linspace(0, len(steps) - 1, min(9, len(steps))).round().astype(int))
 
     header = f"{'iter':>6} " + " ".join(f"{name:>10}" for _, name, _ in GATES)

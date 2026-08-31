@@ -10,7 +10,9 @@
 
 | 파일 | 내용 |
 |---|---|
-| [01-걸음물리.md](01-걸음물리.md) | 본문 + 결과 |
+| [01-걸음물리.md](01-걸음물리.md) | 본문 + 학습·PLAY 결과 |
+| [figures/01-reward-terms.png](figures/01-reward-terms.png) | 보상 항 곡선 |
+| [figures/03-ppo-health.png](figures/03-ppo-health.png) | **mean_std 203** 폭주 |
 | [check_joint_vel_limits.py](check_joint_vel_limits.py) | 시뮬이 들고 있는 관절 속도·토크 한도 |
 | [check_knee_chatter.py](check_knee_chatter.py) | 스윙 vs 고주파 진동 |
 | [watch_gates.py](watch_gates.py) | 학습 중 게이트 숫자 |

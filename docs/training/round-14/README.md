@@ -6,6 +6,8 @@
 
 | 파일 | 내용 |
 |---|---|
-| [01-클립과무릎.md](01-클립과무릎.md) | 본문 + 결과 |
+| [01-클립과무릎.md](01-클립과무릎.md) | 본문 + 학습·PLAY 결과 |
+| [figures/01-reward-terms.png](figures/01-reward-terms.png) | 보상 항 곡선 |
+| [figures/03-ppo-health.png](figures/03-ppo-health.png) | mean_std 안정 |
 | [watch_gates.py](watch_gates.py) | `mean_std` 폭주가 핵심 게이트 |
 | [export_tensorboard_figures.py](export_tensorboard_figures.py) | 12차와 겹쳐 그림 |
