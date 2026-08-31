@@ -5,7 +5,7 @@
 
 | 파일 | 내용 |
 |---|---|
-| [01-기본자세무릎.md](01-기본자세무릎.md) | 본문 + 결과 |
+| [01-무릎-기본자세-당김.md](01-무릎-기본자세-당김.md) | 본문 + 결과 |
 | [videos/round-15-play.mp4](videos/round-15-play.mp4) | PLAY 캡처 (rough test, vx=1.0 m/s) |
 | [videos/round-15-play.gif](videos/round-15-play.gif) | README 미리보기 (mp4 링크) |
 | [videos/round-15-play.webm](videos/round-15-play.webm) | 원본 스크린캐스트 |

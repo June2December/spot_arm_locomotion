@@ -170,7 +170,10 @@ def main(env_cfg, agent_cfg) -> None:
     diag_a = contact_np[:, moving_env, 0] & contact_np[:, moving_env, 3]   # FL + RR
     diag_b = contact_np[:, moving_env, 1] & contact_np[:, moving_env, 2]   # FR + RL
     print(f"  FL+RR both down {100 * float(diag_a.mean()):.1f}%   FR+RL both down {100 * float(diag_b.mean()):.1f}%")
-    print(f"  exactly one diagonal down (trot signature): {100 * float((diag_a ^ diag_b).mean()):.1f}%")
+    # Fraction of moving frames with exactly one diagonal pair in contact
+    # (FL+RR xor FR+RL) — a clean trot contact pattern.
+    print(f"  diagonal trot contact % (exactly one diagonal down):"
+          f" {100 * float((diag_a ^ diag_b).mean()):.1f}%")
 
     print("\n[C] Body bounce")
     bh = d["base_h"][:, moving_env]

@@ -128,7 +128,7 @@ def main(env_cfg, agent_cfg) -> None:
     print("=" * 78)
 
     print("\n[2] Joint range of motion — moving envs only (rad)")
-    print(f"{'joint':>22} {'default':>8} {'mean':>8} {'std':>8} {'p5':>8} {'p95':>8} {'p95-p5':>8}")
+    print(f"{'joint':>22} {'default':>8} {'mean':>8} {'std':>8} {'p5':>8} {'p95':>8} {'range':>8}")
     default = robot.data.default_joint_pos.torch[0].cpu()
     for j, name in enumerate(joint_names):
         if "hip" not in name and "knee" not in name:
