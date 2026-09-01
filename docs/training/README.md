@@ -17,5 +17,8 @@ One folder per training round. Checkpoints and raw TensorBoard runs stay in giti
 | [round-13](round-13/) | Round 13. Clip + trot. Better PLAY gait; `mean_std` blew up to 203 |
 | [round-14](round-14/) | Round 14. `clip_actions=2.5`. No std blow-up; knees stayed crouched |
 | [round-15](round-15/) | Round 15. Knee default pull. Front knee −1.90→−1.75, height 0.43→0.47 m · [PLAY](round-15/videos/round-15-play.mp4) |
+| [round-16](round-16/) | Round 16. Lab velocity commands, dot off, std 0.5 · vx ratio 1.44→0.52 |
+| [round-17](round-17/) | Round 17. Narrow commands · vx ratio 0.52→**0.92** · terrain 0.38→3.62 |
 
 학습 그래프 재생성: `docs/training/export_training_figures.py` · PLAY 숫자: `scripts/evaluate_rollout.py`
+

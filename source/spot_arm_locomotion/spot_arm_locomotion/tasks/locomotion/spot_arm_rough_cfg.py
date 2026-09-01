@@ -1,6 +1,8 @@
 """Velocity-tracking env for Spot with Arm.
 
-Round 15: Lab-style default-pose pull on hip_y + knee. Clip 2.5, gait kept.
+Round 17: narrow command ranges after Lab-wide ranges hurt tracking.
+Round 16: ``track_lin_vel_xy_dot`` off, tracking std 0.5.
+Round 15 baseline: hip_y+knee default pull, clip 2.5, gait kept.
 """
 
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG
@@ -22,7 +24,10 @@ class SpotArmRoughEnvCfg(SpotArmEnvCfg):
         self.rewards.dof_pos_limits.weight = -10.0
         self.rewards.leg_joint_deviation.weight = -0.2
         self.rewards.hip_x_deviation.weight = -1.0
-        self.rewards.track_lin_vel_xy_dot.weight = 1.5
+        self.rewards.track_lin_vel_xy_dot.weight = 0.0
+        # Lab velocity-task default: exp(-error^2 / std^2) with std=sqrt(0.25)=0.5
+        self.rewards.track_lin_vel_xy_exp.params["std"] = 0.5
+        self.rewards.track_ang_vel_z_exp.params["std"] = 0.5
         self.rewards.action_rate_l2.weight = -0.005
         self.rewards.feet_air_time.weight = 1.5
         self.rewards.foot_clearance.weight = 2.0
@@ -58,10 +63,12 @@ class SpotArmRoughEnvCfg(SpotArmEnvCfg):
         self.commands.base_velocity.rel_standing_envs = 0.1
         self.commands.base_velocity.heading_command = False
         self.commands.base_velocity.rel_heading_envs = 0.0
-        self.commands.base_velocity.ranges.lin_vel_x = (0.5, 1.5)
-        self.commands.base_velocity.ranges.lin_vel_y = (-0.4, 0.4)
-        self.commands.base_velocity.ranges.ang_vel_z = (-0.8, 0.8)
-        self.commands.base_velocity.vel_xy_success_threshold = 0.35
+        # Round 17: Lab (-2,3)/(±1.5)/(±2) was too wide after a forward-only
+        # policy. Keep forward-biased, mid ranges; no reverse yet.
+        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 2.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.vel_xy_success_threshold = 0.5
 
 
 @configclass
